@@ -77,7 +77,7 @@ public class ItemController {
                     required = true, dataType = "string", paramType = "header")
     })
     @PutMapping(value = "/approve-order",produces = MediaType.APPLICATION_JSON_VALUE)
-    private ResponseEntity<?> approveOrder(@RequestBody ApproveOrderRequest approveOrderRequest) throws DuplicateDataException {
+    private ResponseEntity<?> approveOrder(@RequestBody ApproveOrderRequest approveOrderRequest) throws DuplicateDataException, InvalidDetailsException {
         Map response=itemServices.approveRequest(approveOrderRequest);
         return new ResponseEntity(response, HttpStatus.OK);
     }
@@ -92,4 +92,13 @@ public class ItemController {
         return new ResponseEntity(response, HttpStatus.OK);
     }
 
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "X-XSRF-TOKEN", value = "Authorization token",
+                    required = true, dataType = "string", paramType = "header")
+    })
+    @GetMapping(value = "/cancel-item/{id}",produces = MediaType.APPLICATION_JSON_VALUE)
+    private ResponseEntity<?> cancelItem(@PathVariable(name = "id") Long itemPriceDetailsId) throws InvalidDetailsException {
+        Map response=itemServices.cancelItem(itemPriceDetailsId);
+        return new ResponseEntity(response, HttpStatus.OK);
+    }
 }

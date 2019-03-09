@@ -156,6 +156,10 @@ public class ItemServices {
         log.info("<=== Started placing order for the item {} ===>",orderDetailsRequest.getItemDetailsId());
         UserInfo userInfo = (UserInfo)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         ItemDetails itemDetails=itemDetailsRepository.findByIdAndSoldStatusAndLendEndDateGreaterThan(orderDetailsRequest.getItemDetailsId(),false,new Date());
+       if(itemDetails.getItem().getOwnerId()==userInfo.getUserId()){
+           log.error("<=== Same user cant lend his own items  ===>");
+           throw new DuplicateDataException("Same user cant lend his own item");
+       }
         if(itemDetails==null){
             log.error("<=== Item {} already lend or date is expire  ===>", orderDetailsRequest.getItemDetailsId());
             throw new DuplicateDataException("Item already lend or lend date expire");
@@ -177,6 +181,7 @@ public class ItemServices {
                 throw new InvalidDetailsException("Please provide the actual price");
             }
         }
+
         ItemPriceDetails itemPriceDetails=new ItemPriceDetails();
         itemPriceDetails.setItemDetailsId(orderDetailsRequest.getItemDetailsId());
         itemPriceDetails.setPrice(orderDetailsRequest.getPrice());
@@ -189,8 +194,9 @@ public class ItemServices {
     }
 
     @Transactional(rollbackOn = Throwable.class)
-    public Map approveRequest(ApproveOrderRequest approveOrderRequest) throws DuplicateDataException {
+    public Map approveRequest(ApproveOrderRequest approveOrderRequest) throws DuplicateDataException, InvalidDetailsException {
         log.info("<=== Started approving requested for the item_details {}===>",approveOrderRequest.getItemDetailsId());
+        UserInfo userInfo = (UserInfo)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         ItemPriceDetails itemPriceDetails=itemPriceDetailsRepository.findOneByIdAndOwnerApproval(approveOrderRequest.getItemPriceDetailsId(),false);
         if(itemPriceDetails == null){
             log.error("<=== No item present in ItemPriceDetails for the id {} and status {} ===>",approveOrderRequest.getItemPriceDetailsId(),false);
@@ -202,6 +208,10 @@ public class ItemServices {
             throw new DuplicateDataException("Item sold out");
         }
         Item item = itemRepository.findOneByIdAndLandStatus(itemDetails.getItem().getId(),true);
+        if(item.getOwnerId() != userInfo.getUserId()){
+            log.error("<===Invalid user trying to approve ===>");
+            throw new InvalidDetailsException("You are not authorized for approve");
+        }
         if(item == null){
             log.error("<=== No item present in Item for the id {} and status {} ===>",itemDetails.getItem().getId(),true);
             throw new DuplicateDataException("Item sold out");
@@ -218,6 +228,23 @@ public class ItemServices {
         this.itemRepository.save(item);
         log.info("<=== Completed approving requested for the item_details {}===>",approveOrderRequest.getItemDetailsId());
         return ResponseJsonUtil.getSuccessResponseJson("Item approved successfully");
+    }
+
+    public Map cancelItem(Long id) throws InvalidDetailsException {
+        log.info("<=== Started canceling the item ===>");
+        UserInfo userInfo = (UserInfo)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        ItemPriceDetails itemPriceDetails= itemPriceDetailsRepository.findOneByIdAndOwnerApproval(id,true);
+        if(itemPriceDetails!=null){
+            if(itemPriceDetails.getUserId()!=userInfo.getUserId()){
+                log.error("<===Invalid user trying to cancel ===>");
+                throw new InvalidDetailsException("You are not authorized for cancellation");
+            }
+            log.error("<=== Item {} already approved and can't be cancel  ===>",id);
+           throw new InvalidDetailsException("Item Already approved .Please contact the owner for cancellation");
+        }
+        itemPriceDetailsRepository.delete(id);
+        log.info("<=== Completed canceling the item ===>");
+        return ResponseJsonUtil.getSuccessResponseJson("Item removed successfully");
     }
 
     public HashMap findAllItems(ItemsFilterRequest itemsFilterRequest) {

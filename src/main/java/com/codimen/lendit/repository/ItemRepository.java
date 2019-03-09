@@ -11,6 +11,6 @@ public interface ItemRepository extends JpaRepository<Item,Long> {
 
 
 
-    Item findOneByIdAndLandStatus(Long Id,boolean status);
+    Item findOneByIdAndLandStatus(Long Id, boolean status);
     List<Item> findAllByOwnerId(Long userId);
 }
