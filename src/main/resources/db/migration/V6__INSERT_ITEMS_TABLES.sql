@@ -36,7 +36,7 @@ CREATE TABLE `item_details` (
   `updated_date` datetime NOT NULL,
   `beeding_type` tinyint(4) NOT NULL,
   `min_price` int(11) DEFAULT NULL,
-  `max_type` int(11) DEFAULT NULL,
+  `max_price` int(11) DEFAULT NULL,
   `flat_price` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_Item_details_1_idx` (`item_id`),
