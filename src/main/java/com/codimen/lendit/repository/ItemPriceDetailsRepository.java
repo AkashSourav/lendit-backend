@@ -8,4 +8,6 @@ public interface ItemPriceDetailsRepository extends JpaRepository<ItemPriceDetai
 
     ItemDetailsProjection findIdByItemDetailsIdAndUserId(Long itemId, Long userId);
 
+    ItemPriceDetails findOneByIdAndOwnerApproval(Long id,boolean status);
+
 }

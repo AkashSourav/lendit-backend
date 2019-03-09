@@ -9,8 +9,8 @@ import java.util.List;
 
 public interface ItemRepository extends JpaRepository<Item,Long> {
 
-    @Query(value = "SELECT * from item where id = (select distinct(task_id) from item_details where id = :taskId)",nativeQuery = true)
-    Item findOneByTaskId(@Param("taskId") Long taskId);
 
+
+    Item findOneByIdAndLandStatus(Long Id,boolean status);
     List<Item> findAllByOwnerId(Long userId);
 }

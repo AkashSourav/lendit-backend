@@ -13,6 +13,7 @@ import com.codimen.lendit.repository.ItemCategoryRepository;
 import com.codimen.lendit.repository.ItemDetailsRepository;
 import com.codimen.lendit.repository.ItemPriceDetailsRepository;
 import com.codimen.lendit.repository.ItemRepository;
+import com.codimen.lendit.security.UserInfo;
 import com.codimen.lendit.utils.FileUploadUtil;
 import com.codimen.lendit.utils.ResponseJsonUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -24,6 +25,7 @@ import org.hibernate.criterion.ProjectionList;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartFile;
@@ -62,14 +64,14 @@ public class ItemServices {
     public Map createItem(MultipartFile file, String submitData) throws Exception
     {
         log.info("<=== Started item creation for owner ===>");
-
+        UserInfo userInfo = (UserInfo) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         CreateItemRequest createItemRequest =  new ObjectMapper().readValue(submitData, CreateItemRequest.class);
         String fileurl = savePic(file);
         Item newItem = new Item();
         newItem.setItemCategory(itemCategoryRepository.getOne(createItemRequest.getCategoryId()));
         newItem.setItemName(createItemRequest.getItemName());
-        newItem.setLandStatus(false);
-        newItem.setOwnerId(1l);
+        newItem.setLandStatus(true);
+        newItem.setOwnerId(userInfo.getUserId());
         newItem.setPictures(fileurl);
         newItem.setManufacturer(createItemRequest.getManufacturer());
         itemRepository.save(newItem);
@@ -110,14 +112,10 @@ public class ItemServices {
                     " and maxFileSize allowed - " + fileUploadUtil.getProfilePicMaxFileSize());
             throw new MultipartException("File larger than maximum size limit!");
         }
-
         String finalItemPicName = fileUploadUtil.getItemPicName(receivedFilename, "items",-1L);
-
         String profilePicUploadPath = fileUploadUtil.getProfilePicUploadPath(finalItemPicName);
-
         // Save the file locally
         fileUploadUtil.saveUserProfilePic(file,profilePicUploadPath);
-
         return fileUploadUtil.getProfilePicUrl(finalItemPicName);
     }
 
@@ -134,7 +132,6 @@ public class ItemServices {
         else{
             itemDetails.setFlatPrice(itemDetailsRequest.getFlatPrice());
         }
-
         itemDetails.setItem(itemRepository.getOne(itemDetailsRequest.getId()));
         itemDetails.setLendStartDate(itemDetailsRequest.getLendStartDate());
         itemDetails.setLendEndDate(itemDetailsRequest.getLendEndDate());
@@ -145,7 +142,6 @@ public class ItemServices {
 
     public Map createRelendItemDetails(ItemRelendDetailsRequest itemRelendDetailsRequest) throws DuplicateDataException {
         log.info("<=== Started creating relend item details ===>");
-
         ItemDetailsProjection itemDetails=itemDetailsRepository.findIdOneByItemIdAndLendEndDateGreaterThan(itemRelendDetailsRequest.getId(),new Date());
         if(itemDetails.getId() != null){
                 log.error("<=== Item {} all ready present for lend ===>", itemRelendDetailsRequest.getId());
@@ -158,19 +154,17 @@ public class ItemServices {
 
     public Map placeOrder(OrderDetailsRequest orderDetailsRequest) throws DuplicateDataException, InvalidDetailsException {
         log.info("<=== Started placing order for the item {} ===>",orderDetailsRequest.getItemDetailsId());
-
+        UserInfo userInfo = (UserInfo)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         ItemDetails itemDetails=itemDetailsRepository.findByIdAndSoldStatusAndLendEndDateGreaterThan(orderDetailsRequest.getItemDetailsId(),false,new Date());
         if(itemDetails==null){
             log.error("<=== Item {} already lend or date is expire  ===>", orderDetailsRequest.getItemDetailsId());
             throw new DuplicateDataException("Item already lend or lend date expire");
         }
-
-        ItemDetailsProjection itemPriceDetailsObj=itemPriceDetailsRepository.findIdByItemDetailsIdAndUserId(orderDetailsRequest.getItemDetailsId(),2l);
+        ItemDetailsProjection itemPriceDetailsObj=itemPriceDetailsRepository.findIdByItemDetailsIdAndUserId(orderDetailsRequest.getItemDetailsId(),userInfo.getUserId());
         if(itemPriceDetailsObj != null){
-            log.error("<=== Item {} already lend by the user {}  ===>", orderDetailsRequest.getItemDetailsId(),2l);
+            log.error("<=== Item {} already lend by the user {}  ===>", orderDetailsRequest.getItemDetailsId(),userInfo.getUserId());
             throw new DuplicateDataException("Item already requested for lend");
         }
-
         if(itemDetails.isBeedingType()){
             if(orderDetailsRequest.getPrice() > itemDetails.getMaxPrice() || orderDetailsRequest.getPrice()<itemDetails.getMinPrice()){
                 log.error("<=== Invalid Price for the item {} ===>",orderDetailsRequest.getItemDetailsId());
@@ -187,56 +181,70 @@ public class ItemServices {
         itemPriceDetails.setItemDetailsId(orderDetailsRequest.getItemDetailsId());
         itemPriceDetails.setPrice(orderDetailsRequest.getPrice());
         itemPriceDetails.setOwnerApproval(false);
-        itemPriceDetails.setUserId(1l);
+        itemPriceDetails.setUserId(userInfo.getUserId());
         itemPriceDetails.setViewedStatus(false);
         itemPriceDetailsRepository.save(itemPriceDetails);
         log.info("<=== Completed placing order for the item {} ===>",orderDetailsRequest.getItemDetailsId());
         return ResponseJsonUtil.getSuccessResponseJson();
     }
 
-    public Map approveRequest(ApproveOrderRequest approveOrderRequest){
+    @Transactional(rollbackOn = Throwable.class)
+    public Map approveRequest(ApproveOrderRequest approveOrderRequest) throws DuplicateDataException {
         log.info("<=== Started approving requested for the item_details {}===>",approveOrderRequest.getItemDetailsId());
-
+        ItemPriceDetails itemPriceDetails=itemPriceDetailsRepository.findOneByIdAndOwnerApproval(approveOrderRequest.getItemPriceDetailsId(),false);
+        if(itemPriceDetails == null){
+            log.error("<=== No item present in ItemPriceDetails for the id {} and status {} ===>",approveOrderRequest.getItemPriceDetailsId(),false);
+            throw new DuplicateDataException("Item sold out");
+        }
+        ItemDetails itemDetails= itemDetailsRepository.findOneByIdAndSoldStatus(approveOrderRequest.getItemDetailsId(),false);
+        if(itemDetails == null){
+            log.error("<=== No item present in ItemDetails for the id {} and status {} ===>",approveOrderRequest.getItemDetailsId(),false);
+            throw new DuplicateDataException("Item sold out");
+        }
+        Item item = itemRepository.findOneByIdAndLandStatus(itemDetails.getItem().getId(),true);
+        if(item == null){
+            log.error("<=== No item present in Item for the id {} and status {} ===>",itemDetails.getItem().getId(),true);
+            throw new DuplicateDataException("Item sold out");
+        }
+        itemPriceDetails.setOwnerApproval(true);
+        itemPriceDetails.setApprovalDate(new Date());
+        itemDetails.setSoldStatus(true);
+        itemDetails.setSoldPrice(itemPriceDetails.getPrice());
+        itemDetails.setUpdatedDate(new Date());
+        item.setLandStatus(false);
+        item.setLastLendDate(new Date());
+        this.itemPriceDetailsRepository.save(itemPriceDetails);
+        this.itemDetailsRepository.save(itemDetails);
+        this.itemRepository.save(item);
         log.info("<=== Completed approving requested for the item_details {}===>",approveOrderRequest.getItemDetailsId());
         return ResponseJsonUtil.getSuccessResponseJson("Item approved successfully");
     }
 
     public HashMap findAllItems(ItemsFilterRequest itemsFilterRequest) {
         HashMap response = new HashMap();
-
         Session session = em.unwrap(Session.class);
         Criteria criteria = session.createCriteria(ItemDetails.class, "itemDetails");
         criteria.createAlias("itemDetails.item", "item");
-
         criteria.createAlias("item.itemCategory", "itemCategory");
-
         criteria.add(Restrictions.or(
                 Restrictions.like("itemDetails.soldStatus", false)));
         if(itemsFilterRequest != null && itemsFilterRequest.getFilters() != null){
-
             if(itemsFilterRequest.getFilters().containsKey("itemName")){
                 String itemName = (String)itemsFilterRequest.getFilters().get("itemName");
-
                 log.info(" itemName " + itemName);
-
                 criteria.add(Restrictions.or(
                         Restrictions.like("item.itemName", "%" + itemName + "%").ignoreCase()));
             }
-
             if(itemsFilterRequest.getFilters().containsKey("category")){
                 String categoryName = (String)itemsFilterRequest.getFilters().get("category");
-
                 log.info(" categoryName " + categoryName);
-
                 criteria.add(Restrictions.or(
                         Restrictions.like("itemCategory.categoryName", "%" + categoryName + "%").ignoreCase()));
             }
         }
-
         criteria.setProjection(Projections.rowCount());
         Integer totalResult = ((Long) criteria.uniqueResult()).intValue();
         criteria.setProjection(null);
-
         // For Pagination
         if (itemsFilterRequest != null && itemsFilterRequest.getPaginationDTO() != null) {
             Integer pageNo = itemsFilterRequest.getPaginationDTO().getPageNo();
@@ -268,9 +276,7 @@ public class ItemServices {
                 criteria.addOrder(Order.desc("itemDetails.createdDate"));
             }
         }
-
         log.info("Criteria Query  : " + criteria);
-
         ProjectionList projectionList = Projections.projectionList();
         projectionList.add(Projections.property("itemDetails.id"));
         projectionList.add(Projections.property("item.id"));
@@ -279,7 +285,6 @@ public class ItemServices {
         projectionList.add(Projections.property("item.lastLendDate"));
         projectionList.add(Projections.property("item.landStatus"));
         projectionList.add(Projections.property("item.pictures"));
-
         projectionList.add(Projections.property("itemDetails.soldStatus"));
         projectionList.add(Projections.property("itemDetails.soldPrice"));
         projectionList.add(Projections.property("itemDetails.address"));

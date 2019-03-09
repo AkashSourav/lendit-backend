@@ -13,4 +13,6 @@ public interface ItemDetailsRepository extends JpaRepository<ItemDetails,Long> {
 
     ItemDetails findByIdAndSoldStatusAndLendEndDateGreaterThan(Long itemId, boolean status, Date date);
 
+    ItemDetails findOneByIdAndSoldStatus(Long id,boolean status);
+
 }

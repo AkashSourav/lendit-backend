@@ -42,30 +42,50 @@ public class ItemController {
         return new ResponseEntity(response, HttpStatus.OK);
     }
 
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "X-XSRF-TOKEN", value = "Authorization token",
+                    required = true, dataType = "string", paramType = "header")
+    })
     @PostMapping(value = "/re-lend",produces = MediaType.APPLICATION_JSON_VALUE)
     private ResponseEntity createRelendItem(@RequestBody ItemRelendDetailsRequest itemRelendDetailsRequest) throws DuplicateDataException {
         Map response=itemServices.createRelendItemDetails(itemRelendDetailsRequest);
         return new ResponseEntity(response, HttpStatus.OK);
     }
 
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "X-XSRF-TOKEN", value = "Authorization token",
+                    required = true, dataType = "string", paramType = "header")
+    })
     @PostMapping(value = "/get-all-items",produces = MediaType.APPLICATION_JSON_VALUE)
     private ResponseEntity<?> getAllItems(@RequestBody ItemsFilterRequest itemsFilterRequest){
        return new ResponseEntity<>(ResponseJsonUtil.getSuccessResponseJson(
                 itemServices.findAllItems(itemsFilterRequest)),HttpStatus.OK);
     }
 
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "X-XSRF-TOKEN", value = "Authorization token",
+                    required = true, dataType = "string", paramType = "header")
+    })
     @PostMapping(value = "/place-order",produces = MediaType.APPLICATION_JSON_VALUE)
     private ResponseEntity<?> placeOrder(@RequestBody OrderDetailsRequest orderDetailsRequest) throws DuplicateDataException, InvalidDetailsException {
         Map response=itemServices.placeOrder(orderDetailsRequest);
         return new ResponseEntity(response, HttpStatus.OK);
     }
 
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "X-XSRF-TOKEN", value = "Authorization token",
+                    required = true, dataType = "string", paramType = "header")
+    })
     @PutMapping(value = "/approve-order",produces = MediaType.APPLICATION_JSON_VALUE)
-    private ResponseEntity<?> approveOrder(@RequestBody ApproveOrderRequest approveOrderRequest){
+    private ResponseEntity<?> approveOrder(@RequestBody ApproveOrderRequest approveOrderRequest) throws DuplicateDataException {
         Map response=itemServices.approveRequest(approveOrderRequest);
         return new ResponseEntity(response, HttpStatus.OK);
     }
 
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "X-XSRF-TOKEN", value = "Authorization token",
+                    required = true, dataType = "string", paramType = "header")
+    })
     @GetMapping(value = "/item-history/{userId}", produces = MediaType.APPLICATION_JSON_VALUE)
     private ResponseEntity<?> getAllItemHistory(@PathVariable(name = "userId") Long userId){
         Map response=itemServices.getAllItemHistory(userId);
