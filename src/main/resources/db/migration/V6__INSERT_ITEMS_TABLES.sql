@@ -52,7 +52,7 @@ CREATE TABLE `item_price_details` (
   PRIMARY KEY (`id`),
   KEY `fk_Item_price_details_1_idx` (`user_id`),
   CONSTRAINT `fk_Item_price_details_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  CONSTRAINT `fk_Item_price_details_2` FOREIGN KEY (`id`) REFERENCES `Item_details` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+  CONSTRAINT `fk_Item_price_details_2` FOREIGN KEY (`id`) REFERENCES `item_details` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 
