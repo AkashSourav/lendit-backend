@@ -3,7 +3,9 @@ package com.codimen.lendit.model;
 import lombok.Data;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @Data
@@ -30,5 +32,8 @@ private Date lastLendDate;
 @Column(name = "land_status")
 private boolean landStatus;
 
+@OneToMany(cascade = CascadeType.ALL,fetch = FetchType.LAZY,orphanRemoval = true)
+@JoinColumn(name = "item_id")
+private List<ItemDetails> itemsDetailsList = new ArrayList<>();
 
 }
