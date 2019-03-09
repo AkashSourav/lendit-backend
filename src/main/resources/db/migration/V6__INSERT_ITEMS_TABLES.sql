@@ -28,7 +28,7 @@ CREATE TABLE `item_details` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `item_id` bigint(20) NOT NULL,
   `sold_status` tinyint(4) NOT NULL,
-  `sold_price` int(11) NOT NULL,
+  `sold_price` int(11) DEFAULT NULL,
   `address` varchar(1000) NOT NULL,
   `lend_start_date` datetime NOT NULL,
   `lend_end_date` datetime NOT NULL,
