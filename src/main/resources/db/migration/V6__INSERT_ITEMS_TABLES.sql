@@ -6,6 +6,7 @@ CREATE TABLE `item_category` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
+
 CREATE TABLE `item` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `item_name` varchar(100) DEFAULT NULL,
@@ -23,8 +24,7 @@ CREATE TABLE `item` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 
-
-CREATE TABLE `Item_details` (
+CREATE TABLE `item_details` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `item_id` bigint(20) DEFAULT NULL,
   `sold_status` tinyint(4) DEFAULT NULL,
@@ -39,7 +39,7 @@ CREATE TABLE `Item_details` (
   CONSTRAINT `fk_Item_details_1` FOREIGN KEY (`item_id`) REFERENCES `item` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
-CREATE TABLE `Item_price_details` (
+CREATE TABLE `item_price_details` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `item_details_id` bigint(20) DEFAULT NULL,
   `user_id` bigint(20) DEFAULT NULL,
