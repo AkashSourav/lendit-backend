@@ -14,13 +14,13 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/items")
 public class ItemController {
 
     @Autowired
     private ItemServices itemServices;
 
-    @PostMapping(value = "/items",produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/new",produces = MediaType.APPLICATION_JSON_VALUE)
     private ResponseEntity createItem(@RequestBody CreateItemRequest createItemRequest){
         Map response=itemServices.createItem(createItemRequest);
         return new ResponseEntity(response, HttpStatus.OK);
