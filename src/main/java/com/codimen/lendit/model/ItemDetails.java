@@ -3,7 +3,9 @@ package com.codimen.lendit.model;
 import lombok.Data;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @Data
@@ -32,5 +34,9 @@ public class ItemDetails extends Traceable {
 
     @Column(name = "lend_end_date")
     private Date lendEndDate;
+
+    @OneToMany(cascade = CascadeType.ALL,fetch = FetchType.LAZY,orphanRemoval = true)
+    @JoinColumn(name = "item_details_id")
+    private List<ItemPriceDetails> itemsPriceDetailsList = new ArrayList<>();
 
 }
