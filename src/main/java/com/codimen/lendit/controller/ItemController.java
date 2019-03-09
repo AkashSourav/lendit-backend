@@ -66,4 +66,10 @@ public class ItemController {
         return new ResponseEntity(response, HttpStatus.OK);
     }
 
+    @GetMapping(value = "/item-history/{userId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    private ResponseEntity<?> getAllItemHistory(@PathVariable(name = "userId") Long userId){
+        Map response=itemServices.getAllItemHistory(userId);
+        return new ResponseEntity(response, HttpStatus.OK);
+    }
+
 }

@@ -11,12 +11,7 @@ public final class RegexValidation {
     public static final String REGEX_ONLY_DIGIT = "\\d+";
     public static final String MESSAGE_ONLY_DIGIT = "Only numeric values allowed";
     public static final String REGEX_PASSWORD = "((?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%]).{8,20})";
-    public static final String MESSAGE_PASSWORD = "The password must contain " +
-                                            "Min 8 characters * " +
-                                            "Uppercase characters (A-Z) * " +
-                                            "Lowercase characters (a-z) * " +
-                                            "Digits (0-9) * " +
-                                            "Special characters (~!@#$%^&*_-+=`|\\(){}[]:;\"'<>,.?/) *";
+    public static final String MESSAGE_PASSWORD = "Password must contain min 8 characters, including upper & lower case letters and numbers";
     public static final String REGEX_EMAIL = "^[\\w-\\+]+(\\.[\\w]+)*@[\\w-]+(\\.[\\w]+)*(\\.[a-z]{2,})$";
     public static final String MESSAGE_EMAIL = "Please Enter valid Email!";
 

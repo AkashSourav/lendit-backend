@@ -9,5 +9,6 @@ public class CreateItemRequest extends ItemDetailsRequest implements Serializabl
 
    private String itemName;
    private Long categoryId;
+   private String manufacturer;
 
 }

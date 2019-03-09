@@ -71,6 +71,7 @@ public class ItemServices {
         newItem.setLandStatus(false);
         newItem.setOwnerId(1l);
         newItem.setPictures(fileurl);
+        newItem.setManufacturer(createItemRequest.getManufacturer());
         itemRepository.save(newItem);
         ItemRelendDetailsRequest itemRelendDetailsRequest=new ItemRelendDetailsRequest();
         itemRelendDetailsRequest.setId(newItem.getId());
@@ -110,15 +111,14 @@ public class ItemServices {
             throw new MultipartException("File larger than maximum size limit!");
         }
 
-        String finalUserProfilePicFileName =
-                fileUploadUtil.getUserProfilePicFileName(receivedFilename, "items",-1L);
+        String finalItemPicName = fileUploadUtil.getItemPicName(receivedFilename, "items",-1L);
 
-        String profilePicUploadPath = fileUploadUtil.getProfilePicUploadPath(finalUserProfilePicFileName);
+        String profilePicUploadPath = fileUploadUtil.getProfilePicUploadPath(finalItemPicName);
 
         // Save the file locally
         fileUploadUtil.saveUserProfilePic(file,profilePicUploadPath);
 
-        return finalUserProfilePicFileName;
+        return fileUploadUtil.getProfilePicUrl(finalItemPicName);
     }
 
 
@@ -290,6 +290,7 @@ public class ItemServices {
         projectionList.add(Projections.property("itemDetails.maxPrice"));
         projectionList.add(Projections.property("itemDetails.flatPrice"));
         projectionList.add(Projections.property("item.itemName"));
+        projectionList.add(Projections.property("item.manufacturer"));
 
         criteria.setProjection(projectionList);
         List<ItemsResponse> itemDetailsArrayList = new ArrayList<>();
@@ -309,17 +310,27 @@ public class ItemServices {
                 responseEntity.setPictures((String) ob[6]);
 
                 responseEntity.setSoldStatus((Boolean) ob[7]);
-                responseEntity.setSoldPrice((Integer) ob[8]);
+                if( ob[8] != null){
+                    responseEntity.setSoldPrice((Integer) ob[8]);
+                }
                 responseEntity.setAddress((String) ob[9]);
                 responseEntity.setLendStartDate((Date) ob[10]);
                 responseEntity.setLendEndDate((Date) ob[11]);
                 responseEntity.setBeedingType((Boolean) ob[12]);
-                responseEntity.setMinPrice((Integer) ob[13]);
+                if( ob[13] != null){
+                    responseEntity.setMinPrice((Integer) ob[13]);
+                }
+
                 if( ob[14] != null){
                     responseEntity.setMaxPrice((Integer) ob[14]);
                 }
-                responseEntity.setFlatPrice((Integer) ob[15]);
+                if(ob[15] != null){
+                    responseEntity.setFlatPrice((Integer) ob[15]);
+                }
                 responseEntity.setItemName(((String) ob[16]));
+                if(ob[17] != null){
+                    responseEntity.setManufacturer(((String) ob[17]));
+                }
 
                 itemDetailsArrayList.add(responseEntity);
 
@@ -331,4 +342,14 @@ public class ItemServices {
         return response;
     }
 
+    public HashMap getAllItemHistory(Long userId) {
+
+        HashMap response  =  new HashMap();
+
+        List<Item> itemList = itemRepository.findAllByOwnerId(userId);
+
+        response.put("data", itemList);
+        return response;
+
+    }
 }

@@ -116,6 +116,12 @@ public class FileUploadUtil {
         return userProfilePicFileName;
     }
 
+    public String getItemPicName(String receivedFilename, String firstName, Long userId) {
+        String ext = this.getExtension(receivedFilename);
+        String userProfilePicFileName = UUID.randomUUID().toString()+ext;
+        return userProfilePicFileName;
+    }
+
     public String getUserOldProfilePicFileName(String url) {
         if(url != null){
             String [] arr = url.split("/");

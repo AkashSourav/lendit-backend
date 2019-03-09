@@ -25,6 +25,7 @@ public class ItemsResponse implements Serializable {
     private Date lastLendDate;
     private boolean landStatus;
     private String pictures;
+    private String manufacturer;
 
     private boolean soldStatus=false;
     private int soldPrice;

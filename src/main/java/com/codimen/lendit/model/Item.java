@@ -1,5 +1,6 @@
 package com.codimen.lendit.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -20,6 +21,7 @@ public class Item extends Traceable{
     @Column(name = "item_name")
     private String itemName;
 
+    @JsonBackReference
     @ManyToOne(cascade = CascadeType.ALL,fetch = FetchType.LAZY)
     private ItemCategory itemCategory;
 
@@ -31,6 +33,8 @@ public class Item extends Traceable{
 
     @Column(name = "land_status")
     private boolean landStatus;
+
+    private String manufacturer;
 
     private String pictures;
 

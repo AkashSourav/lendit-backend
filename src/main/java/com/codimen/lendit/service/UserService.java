@@ -99,7 +99,7 @@ public class UserService {
 
             user.setPassword(SecurityConfiguration.getPasswordEncoder().encode(addUserObj.getPassword()));
             user.setUserRole(UserRoles.USER);
-            user.setAuthorised(false);
+            user.setAuthorised(true);
             Date modifiedDate = new Date();
             user.setCreatedDate(modifiedDate);
             user.setCreatedDate(modifiedDate);
@@ -124,9 +124,9 @@ public class UserService {
             String activationLink = emailContent.getHost().concat(activateUserLink);
             log.info("activation link - " + activationLink);
 
-            this.emailService.sendActivationEmail(user.getFirstName(), user.getEmail(),
-                    activationLink + "emailId="+user.getEmail()+ "&token=" + randomUUIDOne,
-                    activationAccountSubject, emailContent);
+//            this.emailService.sendActivationEmail(user.getFirstName(), user.getEmail(),
+//                    activationLink + "emailId="+user.getEmail()+ "&token=" + randomUUIDOne,
+//                    activationAccountSubject, emailContent);
             log.info("Email sent successfully");
 
             log.info("<====== ended registerUser(RegisterUserRequest addUserObj) ======>");

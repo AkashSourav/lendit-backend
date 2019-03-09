@@ -15,6 +15,7 @@ CREATE TABLE item (
   last_lend_date datetime DEFAULT NULL,
   land_status tinyint(4) NOT NULL,
   pictures varchar(1000),
+  manufacturer varchar(1000) NOT NULL,
   created_date datetime NOT NULL,
   updated_date datetime NOT NULL,
   PRIMARY KEY (id),
