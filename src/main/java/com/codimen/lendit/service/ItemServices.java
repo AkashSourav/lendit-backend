@@ -3,15 +3,20 @@ package com.codimen.lendit.service;
 import com.codimen.lendit.dto.request.CreateItemRequest;
 
 import com.codimen.lendit.dto.request.ItemRelendDetailsRequest;
+import com.codimen.lendit.dto.response.UserProfilePicResponse;
+import com.codimen.lendit.exception.DataFoundNullException;
 import com.codimen.lendit.exception.DuplicateDataException;
 import com.codimen.lendit.dto.request.ItemsFilterRequest;
 import com.codimen.lendit.dto.response.ItemsResponse;
 import com.codimen.lendit.model.Item;
 import com.codimen.lendit.model.ItemDetails;
+import com.codimen.lendit.repository.ItemCategoryRepository;
 import com.codimen.lendit.repository.ItemDetailsRepository;
 import com.codimen.lendit.repository.ItemRepository;
 import com.codimen.lendit.security.UserInfo;
+import com.codimen.lendit.utils.FileUploadUtil;
 import com.codimen.lendit.utils.ResponseJsonUtil;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.models.auth.In;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Criteria;
@@ -24,9 +29,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartException;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
+import java.io.IOException;
 import java.util.Date;
 import java.util.Map;
 import java.util.*;
@@ -42,17 +50,29 @@ public class ItemServices {
     private ItemDetailsRepository itemDetailsRepository;
 
     @Autowired
+    private ItemCategoryRepository itemCategoryRepository;
+
+    @Autowired
     EntityManager em;
 
+    @Autowired
+    private FileUploadUtil fileUploadUtil;
+
     @Transactional(rollbackOn = Throwable.class)
-    public Map createItem(CreateItemRequest createItemRequest)
+    public Map createItem(MultipartFile file, String submitData) throws Exception
     {
         log.info("<=== Started item creation for owner ===>");
+
+        CreateItemRequest createItemRequest =  new ObjectMapper().readValue(submitData, CreateItemRequest.class);
+
+        String fileurl = savePic(file);
+
         Item newItem = new Item();
-        newItem.setItemCategoryId(createItemRequest.getCategoryId());
+        newItem.setItemCategory(itemCategoryRepository.getOne(createItemRequest.getCategoryId()));
         newItem.setItemName(createItemRequest.getItemName());
         newItem.setLandStatus(false);
         newItem.setOwnerId(1l);
+        newItem.setPictures(fileurl);
         itemRepository.save(newItem);
         ItemRelendDetailsRequest itemRelendDetailsRequest=new ItemRelendDetailsRequest();
         itemRelendDetailsRequest.setId(newItem.getId());
@@ -66,6 +86,41 @@ public class ItemServices {
         this.createItemDetails(itemRelendDetailsRequest);
         log.info("<=== Completed item creation for owner ===>");
         return ResponseJsonUtil.getSuccessResponseJson();
+    }
+
+    private String savePic(MultipartFile file) throws DataFoundNullException, IOException {
+        // Get the filename and build the local file path
+        if(file == null || file.isEmpty()){
+            log.error("file found null/empty file");
+            throw new DataFoundNullException("file");
+        }
+        String receivedFilename = file.getOriginalFilename();
+        String extension = fileUploadUtil.getExtension(receivedFilename);
+        if(extension == null){
+            log.error("File extension not supported");
+            throw new MultipartException("File extension not supported");
+        }
+        boolean doesExtMatched = fileUploadUtil.matchProfilePicExtension(extension);
+        if(!doesExtMatched){
+            log.error("File extension not supported");
+            throw new MultipartException("File extension not supported");
+        }
+
+        if (!fileUploadUtil.doesProfileFileSizeLessThenMaxSize(file)) {
+            log.info("Size of the file - " + String.valueOf(file.getSize()) +
+                    " and maxFileSize allowed - " + fileUploadUtil.getProfilePicMaxFileSize());
+            throw new MultipartException("File larger than maximum size limit!");
+        }
+
+        String finalUserProfilePicFileName =
+                fileUploadUtil.getUserProfilePicFileName(receivedFilename, "items",-1L);
+
+        String profilePicUploadPath = fileUploadUtil.getProfilePicUploadPath(finalUserProfilePicFileName);
+
+        // Save the file locally
+        fileUploadUtil.saveUserProfilePic(file,profilePicUploadPath);
+
+        return finalUserProfilePicFileName;
     }
 
 
@@ -109,6 +164,9 @@ public class ItemServices {
         Session session = em.unwrap(Session.class);
         Criteria criteria = session.createCriteria(ItemDetails.class, "itemDetails");
         criteria.createAlias("itemDetails.item", "item");
+
+        criteria.createAlias("item.itemCategory", "itemCategory");
+
         criteria.add(Restrictions.or(
                 Restrictions.like("itemDetails.soldStatus", false)));
         if(itemsFilterRequest != null && itemsFilterRequest.getFilters() != null){
@@ -120,6 +178,15 @@ public class ItemServices {
 
                 criteria.add(Restrictions.or(
                         Restrictions.like("item.itemName", "%" + itemName + "%").ignoreCase()));
+            }
+
+            if(itemsFilterRequest.getFilters().containsKey("category")){
+                String categoryName = (String)itemsFilterRequest.getFilters().get("category");
+
+                log.info(" categoryName " + categoryName);
+
+                criteria.add(Restrictions.or(
+                        Restrictions.like("itemCategory.categoryName", "%" + categoryName + "%").ignoreCase()));
             }
         }
 
@@ -164,7 +231,7 @@ public class ItemServices {
         ProjectionList projectionList = Projections.projectionList();
         projectionList.add(Projections.property("itemDetails.id"));
         projectionList.add(Projections.property("item.id"));
-        projectionList.add(Projections.property("item.itemCategoryId"));
+        projectionList.add(Projections.property("itemCategory.id"));
         projectionList.add(Projections.property("item.ownerId"));
         projectionList.add(Projections.property("item.lastLendDate"));
         projectionList.add(Projections.property("item.landStatus"));

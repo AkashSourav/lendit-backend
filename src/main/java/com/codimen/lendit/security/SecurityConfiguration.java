@@ -47,7 +47,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                     //Allowing Public Apis
                     .antMatchers("/api/auth/sign-in","/api/auth/is-authenticated",
-                            "/api/user/register-user","/api/user/validate-email",
+                            "/api/user/register-user","/api/user/validate-email","/api/category/**",
                             "/api/auth/forgot-password","/api/cities/get-all","/api/items/get-all-items",
                             "/api/auth/confirm-email","/api/auth/reset-password","/api/items/new").permitAll()
                     //Allowing Swagger

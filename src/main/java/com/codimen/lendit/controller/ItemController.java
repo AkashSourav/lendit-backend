@@ -6,12 +6,19 @@ import com.codimen.lendit.exception.DuplicateDataException;
 import com.codimen.lendit.dto.request.ItemsFilterRequest;
 import com.codimen.lendit.service.ItemServices;
 import com.codimen.lendit.utils.ResponseJsonUtil;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -22,8 +29,13 @@ public class ItemController {
     private ItemServices itemServices;
 
     @PostMapping(value = "/new",produces = MediaType.APPLICATION_JSON_VALUE)
-    private ResponseEntity createItem(@RequestBody CreateItemRequest createItemRequest){
-        Map response=itemServices.createItem(createItemRequest);
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "X-XSRF-TOKEN", value = "Authorization token",
+                    required = true, dataType = "string", paramType = "header")
+    })
+    private ResponseEntity createItem(@RequestParam("file") MultipartFile files,
+                                      @NotNull @NotEmpty @NotBlank @RequestParam String submitData) throws Exception{
+        Map response=itemServices.createItem(files, submitData);
         return new ResponseEntity(response, HttpStatus.OK);
     }
 

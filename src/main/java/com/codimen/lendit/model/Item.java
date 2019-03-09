@@ -20,8 +20,8 @@ public class Item extends Traceable{
     @Column(name = "item_name")
     private String itemName;
 
-    @Column(name = "item_category_id")
-    private Long itemCategoryId;
+    @ManyToOne(cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+    private ItemCategory itemCategory;
 
     @Column(name = "owner_id")
     private Long ownerId;
