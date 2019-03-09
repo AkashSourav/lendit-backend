@@ -20,21 +20,21 @@ public class RegisterUserRequest implements Serializable {
     @NotNull
     @NotBlank
     @NotEmpty
-    @Size(min = 1, max = 20)
+    @Size(min = 1, max = 30)
     @Pattern(regexp = RegexValidation.REGEX_ONLY_ALPHABETS, message = RegexValidation.MESSAGE_ONLY_ALPHABETS)
     private String firstName;
 
     @NotNull
     @NotBlank
     @NotEmpty
-    @Size(min = 1, max = 20)
+    @Size(min = 1, max = 30)
     @Pattern(regexp = RegexValidation.REGEX_ONLY_ALPHABETS, message = RegexValidation.MESSAGE_ONLY_ALPHABETS)
     private String lastName;
 
     @NotNull
     @NotBlank
     @NotEmpty
-    @Size(min = 5, max = 30)
+    @Size(min = 5, max = 50)
     @Pattern(regexp = RegexValidation.REGEX_EMAIL, message = RegexValidation.MESSAGE_EMAIL)
     private String email;
 
@@ -48,8 +48,34 @@ public class RegisterUserRequest implements Serializable {
     @NotNull
     @NotBlank
     @NotEmpty
-    @Size(min = 8, max = 20)
+    @Size(min = 8, max = 100)
     @Pattern(regexp = RegexValidation.REGEX_PASSWORD, message =RegexValidation.MESSAGE_PASSWORD)
     private String password;
+
+    @NotNull
+    @NotBlank
+    @NotEmpty
+    @Size(min = 5, max = 200)
+    private String address1;
+
+    @NotNull
+    @NotBlank
+    @NotEmpty
+    @Size(min = 5, max = 200)
+    private String address2;
+
+    @NotNull
+    @NotBlank
+    @NotEmpty
+    @Size(min = 5, max = 50)
+    @Pattern(regexp = RegexValidation.REGEX_ONLY_ALPHABETS, message = RegexValidation.MESSAGE_ONLY_ALPHABETS)
+    private String cityName;
+
+    @NotNull
+    @NotBlank
+    @NotEmpty
+    @Size(min = 6, max = 6)
+    @Pattern(regexp = RegexValidation.REGEX_ONLY_DIGIT, message = RegexValidation.MESSAGE_ONLY_DIGIT)
+    private String pinCode;
 
 }

@@ -28,9 +28,10 @@ public class UserInfo extends User {
 
     public UserInfo(UserRoles role, String username, String password, boolean enabled, boolean accountNonExpired,
                     boolean credentialsNonExpired, boolean accountNonLocked,
-                    Collection<? extends GrantedAuthority> authorities) {
+                    Collection<? extends GrantedAuthority> authorities, Long userId) {
         super(username, password, enabled, accountNonExpired, credentialsNonExpired, accountNonLocked, authorities);
         this.role = role;
+        this.userId = userId;
     }
 
     @Override

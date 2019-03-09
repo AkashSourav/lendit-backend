@@ -91,6 +91,11 @@ public class UserService {
             user.setLastName(addUserObj.getLastName());
             user.setEmail(addUserObj.getEmail());
             user.setMobile(addUserObj.getMobile());
+            user.setAddress1(addUserObj.getAddress2());
+            user.setAddress2(addUserObj.getAddress2());
+            user.setCity(addUserObj.getCityName());
+            user.setPinCode(addUserObj.getPinCode());
+
             user.setPassword(SecurityConfiguration.getPasswordEncoder().encode(addUserObj.getPassword()));
             user.setUserRole(UserRoles.USER);
             user.setAuthorised(false);
@@ -126,28 +131,6 @@ public class UserService {
             log.info("<====== ended registerUser(RegisterUserRequest addUserObj) ======>");
             return ResponseJsonUtil.getSuccessResponseJson();
         }
-    }
-
-    public Map searchUsersByName(String startsWith) throws DataFoundNullException, AuthorizationException, EntityNotFoundException {
-        log.info("<====== Started searchUsersByName(String startsWith) ======>");
-        List<User> users = null;
-        //Checking Authorization
-        if(authenticationService.doesUserHasRightToSeeAdminData()){
-            log.info("searching for the user starts with name"+startsWith);
-            users = this.userRepository.findByFirstNameContainingExcludePassword(startsWith);
-            if (users == null ||users.size() == 0 ) {
-                log.error("user not found with name"+startsWith);
-                throw new EntityNotFoundException(User.class, "User "+Constant.NOT_FOUND,
-                        " startswith : "+startsWith);
-            } else {
-                log.info("total number of user found :: " +users.size());
-            }
-        }else {
-            log.error("Insufficient Privilege!");
-            throw new AuthorizationException("Insufficient Privilege!");
-        }
-        log.info("<====== ended searchUsersByName(String startsWith) ======>");
-        return ResponseJsonUtil.getSuccessResponseJson(users);
     }
 
     public Map searchUsersByEmail(String email)
@@ -244,6 +227,24 @@ public class UserService {
                 user.setMobile(updatedUser.getMobile());
                 userUpdated = true;
             }
+
+            if(updatedUser.getAddress1() != null && !updatedUser.getAddress1().trim().isEmpty()){
+                user.setAddress1(updatedUser.getAddress1());
+                userUpdated = true;
+            }
+            if(updatedUser.getAddress2() != null && !updatedUser.getAddress2().trim().isEmpty()){
+                user.setAddress2(updatedUser.getAddress2());
+                userUpdated = true;
+            }
+            if(updatedUser.getCityName() != null && !updatedUser.getCityName().trim().isEmpty()){
+                user.setCity(updatedUser.getCityName());
+                userUpdated = true;
+            }
+            if(updatedUser.getPinCode() != null && !updatedUser.getPinCode().trim().isEmpty()){
+                user.setPinCode(updatedUser.getPinCode());
+                userUpdated = true;
+            }
+
             if(userUpdated){
                 user.setUpdatedDate(new Date());
                 this.userRepository.save(user);

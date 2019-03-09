@@ -16,3 +16,12 @@ VALUES
 ('1', now(), 0, 0, '1', 'test'),
 ('2', now(), 0, 0, '2', 'test'),
 ('3', now(), 0, 0, '3', 'test');
+
+
+INSERT INTO cities
+(id, city_name)
+VALUES
+(1, "Bangalore"),
+(2, "Delhi"),
+(3, "Mumbai"),
+(4, "Pune");

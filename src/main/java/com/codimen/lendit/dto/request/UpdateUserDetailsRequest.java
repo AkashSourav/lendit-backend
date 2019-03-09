@@ -24,11 +24,11 @@ public class UpdateUserDetailsRequest implements Serializable {
     @Min(value = 1, message = "User Id should be greater than Zero!" )
     private Long userId;
 
-    @Size(min = 1, max = 20)
+    @Size(min = 1, max = 30)
     @Pattern(regexp = RegexValidation.REGEX_ONLY_ALPHABETS, message = RegexValidation.MESSAGE_ONLY_ALPHABETS)
     private String firstName;
 
-    @Size(min = 1, max = 20)
+    @Size(min = 1, max = 30)
     @Pattern(regexp = RegexValidation.REGEX_ONLY_ALPHABETS, message = RegexValidation.MESSAGE_ONLY_ALPHABETS)
     private String lastName;
 
@@ -36,7 +36,22 @@ public class UpdateUserDetailsRequest implements Serializable {
     @Pattern(regexp = RegexValidation.REGEX_ONLY_DIGIT, message = RegexValidation.MESSAGE_ONLY_DIGIT)
     private String mobile;
 
-    @Size(min = 8, max = 20)
+    @Size(min = 8, max = 100)
     @Pattern(regexp = RegexValidation.REGEX_PASSWORD, message =RegexValidation.MESSAGE_PASSWORD)
     private String password;
+
+    @Size(min = 1, max = 200)
+    private String address1;
+
+    @Size(min = 1, max = 200)
+    private String address2;
+
+    @Size(min = 1, max = 30)
+    @Pattern(regexp = RegexValidation.REGEX_ONLY_ALPHABETS, message = RegexValidation.MESSAGE_ONLY_ALPHABETS)
+    private String cityName;
+
+    @Size(min = 6, max = 6)
+    @Pattern(regexp = RegexValidation.REGEX_ONLY_DIGIT, message = RegexValidation.MESSAGE_ONLY_DIGIT)
+    private String pinCode;
+
 }

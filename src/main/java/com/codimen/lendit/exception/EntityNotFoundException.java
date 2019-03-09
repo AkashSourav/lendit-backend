@@ -20,12 +20,12 @@ public class EntityNotFoundException extends Exception {
 
     private static String generateMessage(String entity, Map<String, String> searchParams) {
         return StringUtils.capitalize(entity) +
-                " was not found for parameters " +
+                " not found for parameters " +
                 searchParams;
     }
 
     private static String generateMessage(String entity) {
-        return StringUtils.capitalize(entity) + " was not found, it's Empty! ";
+        return StringUtils.capitalize(entity) + " not found, it's Empty! ";
     }
 
     private static <K, V> Map<K, V> toMap(

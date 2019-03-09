@@ -91,7 +91,7 @@ public class AuthenticationService implements UserDetailsService {
         log.info("Found user with id: " + user.getId() + " ;type: " + user.getUserRole().toString() + " ;type-name: " + user.getUserRole().name() + " ;");
 
         UserInfo authenticatedUser = new UserInfo(user.getUserRole(), user.getEmail(), user.getPassword(), true,
-                accountNonExpired, credentialsNonExpired, accountNonLocked, getAuthorities(user.getUserRole()));
+                accountNonExpired, credentialsNonExpired, accountNonLocked, getAuthorities(user.getUserRole()),user.getId());
         log.info("authenticated user: " + authenticatedUser.toString());
         log.info("<====== Ended loadUserByUsername(String email) ======>");
         return authenticatedUser;
@@ -136,8 +136,7 @@ public class AuthenticationService implements UserDetailsService {
             log.info("<====== Ended login(String email, String password, HttpServletRequest request, HttpServletResponse response) ======>");
             return responseMap;
         } else {
-            throw new AuthenticationServiceException("Invalid Credentials. "+
-                    (MAX_FAILED_SIGN_IN_ATTEMPT-loginDetail.getFailedAttempt())+" attempts left");
+            throw new AuthenticationServiceException("Invalid Credentials. ");
         }
     }
 
@@ -147,8 +146,7 @@ public class AuthenticationService implements UserDetailsService {
             throws AuthorizationException, EntityNotFoundException {
         if (loginDetail == null) {
             log.error("LoginDetail not found for email: " + email);
-            throw new EntityNotFoundException(LoginDetail.class,"LoginDetails " + Constant.NOT_FOUND,
-                    "EmailId : "+email);
+            throw new EntityNotFoundException(LoginDetail.class,"EmailId ", email);
         }
     }
 
@@ -198,7 +196,7 @@ public class AuthenticationService implements UserDetailsService {
         User user = this.userRepository.findOneByEmail(emailId);
         if (user == null) {
             log.error("User not found with email:");
-            throw new EntityNotFoundException(User.class, "User "+Constant.NOT_FOUND, emailId);
+            throw new EntityNotFoundException(User.class, "UserId", emailId);
         }
         if(!user.getAuthorised()){
             throw new AuthorizationException(Constant.AUTHORIZATION_FAILED);
@@ -240,13 +238,19 @@ public class AuthenticationService implements UserDetailsService {
 
     public void resetPassword(UpdatePasswordRequest updatePasswordRequest) throws EntityNotFoundException, AuthorizationException {
         log.info("<====== Started resetPassword(UpdatePasswordRequest updatePasswordRequest) ======>");
-        User user = this.userRepository.findByEmailAndUuid(updatePasswordRequest.getEmail(), updatePasswordRequest.getToken());
+        User user = this.userRepository.findByEmail(updatePasswordRequest.getEmail());
         if (user == null) {
             log.error("User not found with id:"+updatePasswordRequest.getEmail());
-            throw new EntityNotFoundException(User.class,"User "+Constant.NOT_FOUND + updatePasswordRequest.getEmail());
+            throw new EntityNotFoundException(User.class,"UserId", updatePasswordRequest.getEmail());
         }
         if(!user.getAuthorised()){
             throw new AuthorizationException(Constant.AUTHORIZATION_FAILED);
+        }
+        if(user.getUuid() == null){
+            throw new UsernameNotFoundException("Reset password link is valid only once");
+        }
+        if(!user.getUuid().equals(updatePasswordRequest.getToken())){
+            throw new UsernameNotFoundException("Reset password failed Unauthorised");
         }
         user.setPassword(SecurityConfiguration.getPasswordEncoder().encode(updatePasswordRequest.getPassword()));
         user.setUpdatedDate(new Date());
@@ -258,11 +262,19 @@ public class AuthenticationService implements UserDetailsService {
 
     public boolean confirmEmail(ConfirmEmailRequest confirmEmailRequest) throws EntityNotFoundException {
         log.info("<====== Started confirmEmail(ConfirmEmailRequest confirmEmailRequest) ======>");
-        User user = this.userRepository.findByEmailAndUuid(confirmEmailRequest.getEmail(), confirmEmailRequest.getToken());
+        User user = this.userRepository.findByEmail(confirmEmailRequest.getEmail());
         if (user == null) {
             log.error("User not found:");
-            throw new EntityNotFoundException(User.class,"User "+Constant.NOT_FOUND + confirmEmailRequest.getEmail());
+            throw new EntityNotFoundException(User.class,"User", confirmEmailRequest.getEmail());
         }
+
+        if(user.getAuthorised()){
+            throw new UsernameNotFoundException("Already verified user");
+        }
+        if(!user.getUuid().equals(confirmEmailRequest.getToken())){
+            throw new UsernameNotFoundException("Activation failed, Already verified");
+        }
+
         user.setUuid(null);
         user.setAuthorised(true);
         user.setUpdatedDate(new Date());

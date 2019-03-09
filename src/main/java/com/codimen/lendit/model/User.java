@@ -30,22 +30,28 @@ public class User extends Traceable implements Serializable{
     private String password;
     private String profilePic;
     private String mobile;
-    private String address;
+    private String address1;
+    private String address2;
     private String city;
+    private String pinCode;
     @JsonIgnore
     private String uuid;
+    @JsonIgnore
     private UserRoles userRole;
+    @JsonIgnore
     private Boolean authorised = false;
 
     public User(Long id, String firstName, String lastName, String email, String profilePic,
-                String mobile, String address, String city, UserRoles userRole, Boolean authorised) {
+                String mobile, String address1, String address2, String pinCode, String city, UserRoles userRole, Boolean authorised) {
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
         this.profilePic = profilePic;
         this.mobile = mobile;
-        this.address = address;
+        this.address1 = address1;
+        this.address2 = address2;
+        this.pinCode = pinCode;
         this.city = city;
         this.userRole = userRole;
         this.authorised = authorised;

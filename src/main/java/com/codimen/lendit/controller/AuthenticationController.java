@@ -5,6 +5,9 @@ import com.codimen.lendit.dto.request.LoginRequest;
 import com.codimen.lendit.dto.request.UpdatePasswordRequest;
 import com.codimen.lendit.exception.AuthorizationException;
 import com.codimen.lendit.exception.EntityNotFoundException;
+import com.codimen.lendit.model.LoginDetail;
+import com.codimen.lendit.repository.LoginDetailRepository;
+import com.codimen.lendit.repository.UserRepository;
 import com.codimen.lendit.security.UserInfo;
 import com.codimen.lendit.security.UserLogInDetailsInMemory;
 import com.codimen.lendit.service.AuthenticationService;
@@ -40,6 +43,9 @@ public class AuthenticationController {
     @Autowired
     private AuthenticationService authenticationService;
 
+    @Autowired
+    private LoginDetailRepository loginDetailRepository;
+
     private UserLogInDetailsInMemory userLogInDetailsInMemory = UserLogInDetailsInMemory.getInstance();
 
     @RequestMapping(value = "is-authenticated", method = RequestMethod.POST,
@@ -55,11 +61,6 @@ public class AuthenticationController {
             response.put("isAuthenticated",false);
             return response;
         }
-    }
-
-    @RequestMapping(value = "user" , method = RequestMethod.GET)
-    public Principal isAuthorised(Principal user) {
-        return user;
     }
 
     @RequestMapping(value = "sign-in", method = RequestMethod.POST,
@@ -132,7 +133,8 @@ public class AuthenticationController {
         if (userInfo == null) {
             throw new AuthenticationServiceException("Authorization Failed!");
         }
-        return new ResponseEntity<>(ResponseJsonUtil.getSuccessResponseJson(userInfo.getLoginDetail()),HttpStatus.OK);
+        return new ResponseEntity<>(ResponseJsonUtil.getSuccessResponseJson(
+                loginDetailRepository.findOneByUserId(userInfo.getUserId())),HttpStatus.OK);
     }
 
     @RequestMapping(value = "/forgot-password", method = RequestMethod.POST,

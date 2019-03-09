@@ -10,7 +10,7 @@ public class DataFoundNullException extends Exception {
 
     private static String generateMessage(String entity) {
         return StringUtils.capitalize(entity)
-                + " was not found Null/Empty, it's Should not be Empty! ";
+                + " not found Null/Empty, it's Should not be Empty! ";
     }
 
 }

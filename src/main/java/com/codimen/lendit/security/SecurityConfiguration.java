@@ -48,7 +48,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                     //Allowing Public Apis
                     .antMatchers("/api/auth/sign-in","/api/auth/is-authenticated",
                             "/api/user/register-user","/api/user/validate-email",
-                            "/api/auth/forgot-password",
+                            "/api/auth/forgot-password","/api/cities/get-all",
                             "/api/auth/confirm-email","/api/auth/reset-password").permitAll()
                     //Allowing Swagger
                     .antMatchers("/common/**", "/v2/api-docs", "/configuration/ui", "/swagger-resources",

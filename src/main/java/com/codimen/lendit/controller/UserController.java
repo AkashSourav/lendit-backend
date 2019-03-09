@@ -2,6 +2,7 @@ package com.codimen.lendit.controller;
 
 import com.codimen.lendit.dto.request.RegisterUserRequest;
 import com.codimen.lendit.dto.request.UpdateUserDetailsRequest;
+import com.codimen.lendit.dto.request.ValidateEmailRequest;
 import com.codimen.lendit.exception.AuthorizationException;
 import com.codimen.lendit.exception.DataFoundNullException;
 import com.codimen.lendit.exception.EntityNotFoundException;
@@ -35,9 +36,9 @@ public class UserController {
     @RequestMapping(value = "validate-email",
             method = RequestMethod.POST,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Object> validateEmail(@RequestParam("email") String email) {
+    public ResponseEntity<Object> validateEmail(@Validated @RequestBody ValidateEmailRequest email) {
         Map<String, Boolean> data = new HashMap<>();
-        data.put("canUseEmail", this.userService.validateEmail(email));
+        data.put("canUseEmail", this.userService.validateEmail(email.getEmail()));
         return new ResponseEntity<>(data, HttpStatus.OK);
     }
 
@@ -62,82 +63,8 @@ public class UserController {
         return new ResponseEntity(this.userService.updateUser(updateUser), HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/search-user",
-            method = RequestMethod.POST,
-            produces = MediaType.APPLICATION_JSON_VALUE)
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "X-XSRF-TOKEN", value = "Authorization token",
-                    required = true, dataType = "string", paramType = "header")
-    })
-    public ResponseEntity<Object> getAutocompleteUser(@RequestParam("startsWith") String startsWith)
-            throws DataFoundNullException, AuthorizationException, EntityNotFoundException {
-        return new ResponseEntity<>(ResponseJsonUtil.getSuccessResponseJson(
-                this.userService.searchUsersByName(startsWith)), HttpStatus.OK);
-    }
 
-    @RequestMapping(value = "/search-by-email",
-            method = RequestMethod.POST,
-            produces = MediaType.APPLICATION_JSON_VALUE)
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "X-XSRF-TOKEN", value = "Authorization token",
-                    required = true, dataType = "string", paramType = "header")
-    })
-    public ResponseEntity<Object> searchUsersByEmail(@RequestParam("email") String email)
-            throws EntityNotFoundException, AuthorizationException, DataFoundNullException {
-        return new ResponseEntity<>(ResponseJsonUtil.getSuccessResponseJson(
-                this.userService.searchUsersByEmail(email)), HttpStatus.OK);
-    }
-
-    @RequestMapping(value = "get-user",
-            method = RequestMethod.POST,
-            produces = MediaType.APPLICATION_JSON_VALUE)
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "X-XSRF-TOKEN", value = "Authorization token",
-                    required = true, dataType = "string", paramType = "header")
-    })
-    public ResponseEntity<Object> getUserById(@RequestParam("userId") long userId)
-            throws EntityNotFoundException, AuthorizationException, DataFoundNullException {
-        User user = this.userService.getUsersById(userId);
-        user.setPassword(null);
-        return new ResponseEntity(user, HttpStatus.OK);
-    }
-
-    @RequestMapping(value = "users-list",
-            method = RequestMethod.POST,
-            produces = MediaType.APPLICATION_JSON_VALUE)
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "X-XSRF-TOKEN", value = "Authorization token",
-                    required = true, dataType = "string", paramType = "header")
-    })
-    public ResponseEntity<Object> usersList() throws AuthorizationException {
-       return new ResponseEntity(this.userService.listAllUsers(), HttpStatus.OK);
-    }
-
-    @RequestMapping(value = "user-role-list",
-            method = RequestMethod.POST,
-            produces = MediaType.APPLICATION_JSON_VALUE)
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "X-XSRF-TOKEN", value = "Authorization token",
-                    required = true, dataType = "string", paramType = "header")
-    })
-    public ResponseEntity<Object> userRolesList() throws AuthorizationException {
-        return new ResponseEntity(this.userService.userRolesList(), HttpStatus.OK);
-    }
-    @RequestMapping(value = "disable-user",
-            method = RequestMethod.POST,
-            produces = MediaType.APPLICATION_JSON_VALUE)
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "X-XSRF-TOKEN", value = "Authorization token",
-                    required = true, dataType = "string", paramType = "header")
-    })
-    public ResponseEntity<Object> disableUserAccount(
-            @NotNull @Min(value = 1, message = "User Id should be greater than Zero!" )
-            @RequestParam("userId")Long userId)
-            throws DataFoundNullException, EntityNotFoundException, AuthorizationException {
-        return new ResponseEntity(this.userService.disableUserAccount(userId), HttpStatus.OK);
-    }
-
-    @RequestMapping(value = "upload-file", method = RequestMethod.POST)
+    @RequestMapping(value = "upload-profile-pic", method = RequestMethod.POST)
     @ApiImplicitParams({
             @ApiImplicitParam(name = "X-XSRF-TOKEN", value = "Authorization token",
                     required = true, dataType = "string", paramType = "header")

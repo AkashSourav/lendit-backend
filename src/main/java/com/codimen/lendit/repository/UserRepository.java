@@ -15,12 +15,13 @@ public interface UserRepository extends JpaRepository<User, Long> {
     List<User> findByFirstNameContaining(String firstName);
 
     @Query(value = "Select new User(u.id, u.firstName,u.lastName,u.email,u.profilePic,u.mobile," +
-            "u.address,u.city,u.userRole,u.authorised) from User u where u.firstName like %:startsWith%")
-    List<User> findByFirstNameContainingExcludePassword(@Param("startsWith") String startsWith);
-
-    @Query(value = "Select new User(u.id, u.firstName,u.lastName,u.email,u.profilePic,u.mobile," +
-            "u.address,u.city,u.userRole,u.authorised) from User u")
+            "u.address1, u.address2, u.pinCode, u.city, u.userRole,u.authorised) from User u")
     List<User> findAllUsersExcludePassword();
 
+    @Query(value = "Select new User(u.id, u.firstName,u.lastName,u.email,u.profilePic,u.mobile," +
+            "u.address1, u.address2, u.pinCode, u.city, u.userRole,u.authorised) from User u")
+    List<User> findByUserId(Long userId);
+
     User findByEmailAndUuid(String emailId, String uuid);
+    User findByEmail(String emailId);
 }

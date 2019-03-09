@@ -13,21 +13,14 @@ import java.io.Serializable;
 @NoArgsConstructor
 @ToString
 @EqualsAndHashCode
-public class UpdatePasswordRequest implements Serializable {
+public class ValidateEmailRequest implements Serializable {
+
+    private static final long serialVersionUID = 3609225587793419524L;
 
     @NotNull
-    @NotEmpty
     @NotBlank
-    @Size(min = 5, max = 50)
+    @NotEmpty
+    @Size(min = 5, max = 30)
     @Pattern(regexp = RegexValidation.REGEX_EMAIL, message = RegexValidation.MESSAGE_EMAIL)
     private String email;
-
-    @NotNull
-    @NotEmpty
-    @NotBlank
-    private String token;
-
-    @Size(min = 8, max = 100)
-    @Pattern(regexp = RegexValidation.REGEX_PASSWORD, message =RegexValidation.MESSAGE_PASSWORD)
-    private String password;
 }
