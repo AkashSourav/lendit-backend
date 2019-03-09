@@ -34,10 +34,15 @@ CREATE TABLE `item_details` (
   `lend_end_date` datetime NOT NULL,
   `created_date` datetime NOT NULL,
   `updated_date` datetime NOT NULL,
+  `beeding_type` tinyint(4) NOT NULL,
+  `min_price` int(11) DEFAULT NULL,
+  `max_type` int(11) DEFAULT NULL,
+  `flat_price` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_Item_details_1_idx` (`item_id`),
   CONSTRAINT `fk_Item_details_1` FOREIGN KEY (`item_id`) REFERENCES `item` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
 
 CREATE TABLE `item_price_details` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,

@@ -35,6 +35,18 @@ public class ItemDetails extends Traceable {
     @Column(name = "lend_end_date")
     private Date lendEndDate;
 
+    @Column(name = "beeding_type")
+    private boolean beedingType;
+
+    @Column(name = "min_price")
+    private int minPrice;
+
+    @Column(name = "max_price")
+    private int maxPrice;
+
+    @Column(name = "flat_price")
+    private int flatPrice;
+
     @OneToMany(cascade = CascadeType.ALL,fetch = FetchType.LAZY,orphanRemoval = true)
     @JoinColumn(name = "item_details_id")
     private List<ItemPriceDetails> itemsPriceDetailsList = new ArrayList<>();
