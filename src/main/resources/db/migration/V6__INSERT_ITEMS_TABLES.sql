@@ -33,6 +33,7 @@ CREATE TABLE `Item_details` (
   `lend_start_date` datetime DEFAULT NULL,
   `lend_end_date` datetime DEFAULT NULL,
   `created_date` datetime DEFAULT NULL,
+  `updated_date` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_Item_details_1_idx` (`item_id`),
   CONSTRAINT `fk_Item_details_1` FOREIGN KEY (`item_id`) REFERENCES `item` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
