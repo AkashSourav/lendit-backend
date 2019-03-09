@@ -39,7 +39,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity httpSecurity) throws Exception {
 
         httpSecurity.csrf().ignoringAntMatchers("/api/auth/sign-in","/api/auth/is-authenticated",
-                "/api/user/register-user","/api/user/validate-email",
+                "/api/user/register-user","/api/user/validate-email","/api/items/get-all-items",
                 "/api/account/get-banks","/api/account/get-branch-by-id","/api/account/get-branch-by-bank"
                 ,"/api/auth/forgot-password","/api/auth/reset-password","/api/auth/confirm-email","/api/items/new");
 
@@ -48,7 +48,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                     //Allowing Public Apis
                     .antMatchers("/api/auth/sign-in","/api/auth/is-authenticated",
                             "/api/user/register-user","/api/user/validate-email",
-                            "/api/auth/forgot-password","/api/cities/get-all",
+                            "/api/auth/forgot-password","/api/cities/get-all","/api/items/get-all-items",
                             "/api/auth/confirm-email","/api/auth/reset-password","/api/items/new").permitAll()
                     //Allowing Swagger
                     .antMatchers("/common/**", "/v2/api-docs", "/configuration/ui", "/swagger-resources",

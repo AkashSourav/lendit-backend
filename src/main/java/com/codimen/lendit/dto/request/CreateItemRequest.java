@@ -9,6 +9,6 @@ import java.util.Date;
 public class CreateItemRequest extends ItemDetailsRequest implements Serializable {
 
    private String itemName;
-   private int categoryId;
+   private Long categoryId;
 
 }

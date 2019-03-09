@@ -33,6 +33,14 @@ public class MailContentBuilder {
         return build(variables, "forgotPassword");
     }
 
+    public String buildOwnerNotificationTemplate(String userName, String activationLink, EmailContent emailContent) {
+        Map<String, Object> variables = new HashMap<String, Object>();
+        variables.put("userName", userName);
+        variables.put("activationLink", activationLink);
+        variables.put("emailContent", emailContent);
+        return build(variables, "notification");
+    }
+
     private String build(Map<String, Object> map, String templateName) {
         Context context = new Context();
         for (Map.Entry<String, Object> entry : map.entrySet()) {

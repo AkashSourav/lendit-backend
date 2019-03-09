@@ -9,7 +9,6 @@ import java.util.List;
 
 @Entity
 @Data
-@Table(name = "item_details")
 public class ItemDetails extends Traceable {
 
     @Id
@@ -17,8 +16,9 @@ public class ItemDetails extends Traceable {
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "item_id")
-    private Long itemId;
+    @ManyToOne(cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+    @JoinColumn(name = "item_id")
+    private Item item;
 
     @Column(name = "sold_status")
     private boolean soldStatus=false;

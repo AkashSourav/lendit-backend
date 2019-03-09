@@ -12,28 +12,30 @@ import java.util.List;
 @Table(name = "item")
 public class Item extends Traceable{
 
-@Id
-@GeneratedValue(strategy = GenerationType.IDENTITY)
-@Column(name="id")
-private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name="id")
+    private Long id;
 
-@Column(name = "item_name")
-private String itemName;
+    @Column(name = "item_name")
+    private String itemName;
 
-@Column(name = "item_category_id")
-private Integer itemCategoryId;
+    @Column(name = "item_category_id")
+    private Long itemCategoryId;
 
-@Column(name = "owner_id")
-private Long ownerId;
+    @Column(name = "owner_id")
+    private Long ownerId;
 
-@Column(name = "last_lend_date")
-private Date lastLendDate;
+    @Column(name = "last_lend_date")
+    private Date lastLendDate;
 
-@Column(name = "land_status")
-private boolean landStatus;
+    @Column(name = "land_status")
+    private boolean landStatus;
 
-@OneToMany(cascade = CascadeType.ALL,fetch = FetchType.LAZY,orphanRemoval = true)
-@JoinColumn(name = "item_id")
-private List<ItemDetails> itemsDetailsList = new ArrayList<>();
+    private String pictures;
+
+    @OneToMany(cascade = CascadeType.ALL,fetch = FetchType.LAZY,orphanRemoval = true)
+    @JoinColumn(name = "item_id")
+    private List<ItemDetails> itemsDetailsList = new ArrayList<>();
 
 }
