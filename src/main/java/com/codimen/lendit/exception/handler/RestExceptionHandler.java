@@ -1,9 +1,6 @@
 package com.codimen.lendit.exception.handler;
 
-import com.codimen.lendit.exception.AuthorizationException;
-import com.codimen.lendit.exception.DataFoundNullException;
-import com.codimen.lendit.exception.DuplicateDataException;
-import com.codimen.lendit.exception.EntityNotFoundException;
+import com.codimen.lendit.exception.*;
 import com.codimen.lendit.utils.ResponseJsonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.exception.ConstraintViolationException;
@@ -287,11 +284,20 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(DuplicateDataException.class)
-    protected ResponseEntity<Object> handleDuplicateDataException(AuthenticationServiceException ex) {
-        String error = "Access denied!";
+    protected ResponseEntity<Object> handleDuplicateDataException(DuplicateDataException ex) {
+        String error = ex.getMessage();
         log.error(ex.getMessage(), ex);
         return buildResponseEntity(new ApiError(BAD_REQUEST, error, ex));
     }
+
+
+    @ExceptionHandler(InvalidDetailsException.class)
+    protected ResponseEntity<Object> handleInvalidDetailsException(InvalidDetailsException ex) {
+        String error = ex.getMessage();
+        log.error(ex.getMessage(), ex);
+        return buildResponseEntity(new ApiError(BAD_REQUEST, error, ex));
+    }
+
 
     /**
      * Handle Exception, handle generic Exception.class

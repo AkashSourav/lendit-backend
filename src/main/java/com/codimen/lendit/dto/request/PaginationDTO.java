@@ -1,6 +1,7 @@
 package com.codimen.lendit.dto.request;
 
 import lombok.Data;
+
 import java.io.Serializable;
 
 @Data

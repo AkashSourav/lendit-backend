@@ -1,7 +1,6 @@
 package com.codimen.lendit.dto.request;
 
 import lombok.Data;
-import org.springframework.data.domain.Pageable;
 
 import java.util.HashMap;
 

@@ -1,23 +1,21 @@
 package com.codimen.lendit.service;
 
-import com.codimen.lendit.dto.request.CreateItemRequest;
-
-import com.codimen.lendit.dto.request.ItemRelendDetailsRequest;
-import com.codimen.lendit.dto.response.UserProfilePicResponse;
+import com.codimen.lendit.dto.request.*;
 import com.codimen.lendit.exception.DataFoundNullException;
 import com.codimen.lendit.exception.DuplicateDataException;
-import com.codimen.lendit.dto.request.ItemsFilterRequest;
 import com.codimen.lendit.dto.response.ItemsResponse;
+import com.codimen.lendit.exception.InvalidDetailsException;
 import com.codimen.lendit.model.Item;
 import com.codimen.lendit.model.ItemDetails;
+import com.codimen.lendit.model.ItemPriceDetails;
+import com.codimen.lendit.model.projection.ItemDetailsProjection;
 import com.codimen.lendit.repository.ItemCategoryRepository;
 import com.codimen.lendit.repository.ItemDetailsRepository;
+import com.codimen.lendit.repository.ItemPriceDetailsRepository;
 import com.codimen.lendit.repository.ItemRepository;
-import com.codimen.lendit.security.UserInfo;
 import com.codimen.lendit.utils.FileUploadUtil;
 import com.codimen.lendit.utils.ResponseJsonUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.swagger.models.auth.In;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
@@ -26,8 +24,6 @@ import org.hibernate.criterion.ProjectionList;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.AuthenticationServiceException;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartFile;
@@ -50,6 +46,10 @@ public class ItemServices {
     private ItemDetailsRepository itemDetailsRepository;
 
     @Autowired
+    private ItemPriceDetailsRepository itemPriceDetailsRepository;
+
+
+    @Autowired
     private ItemCategoryRepository itemCategoryRepository;
 
     @Autowired
@@ -64,9 +64,7 @@ public class ItemServices {
         log.info("<=== Started item creation for owner ===>");
 
         CreateItemRequest createItemRequest =  new ObjectMapper().readValue(submitData, CreateItemRequest.class);
-
         String fileurl = savePic(file);
-
         Item newItem = new Item();
         newItem.setItemCategory(itemCategoryRepository.getOne(createItemRequest.getCategoryId()));
         newItem.setItemName(createItemRequest.getItemName());
@@ -148,14 +146,59 @@ public class ItemServices {
     public Map createRelendItemDetails(ItemRelendDetailsRequest itemRelendDetailsRequest) throws DuplicateDataException {
         log.info("<=== Started creating relend item details ===>");
 
-        ItemDetails itemDetails=itemDetailsRepository.findOneByItemIdAndLendEndDateGreaterThan(itemRelendDetailsRequest.getId(),new Date());
-        if(itemDetails != null){
+        ItemDetailsProjection itemDetails=itemDetailsRepository.findIdOneByItemIdAndLendEndDateGreaterThan(itemRelendDetailsRequest.getId(),new Date());
+        if(itemDetails.getId() != null){
                 log.error("<=== Item {} all ready present for lend ===>", itemRelendDetailsRequest.getId());
                 throw new DuplicateDataException("Item already present for lend");
         }
         this.createItemDetails(itemRelendDetailsRequest);
         log.info("<=== Completed creating relend item details ===>");
         return ResponseJsonUtil.getSuccessResponseJson();
+    }
+
+    public Map placeOrder(OrderDetailsRequest orderDetailsRequest) throws DuplicateDataException, InvalidDetailsException {
+        log.info("<=== Started placing order for the item {} ===>",orderDetailsRequest.getItemDetailsId());
+
+        ItemDetails itemDetails=itemDetailsRepository.findByIdAndSoldStatusAndLendEndDateGreaterThan(orderDetailsRequest.getItemDetailsId(),false,new Date());
+        if(itemDetails==null){
+            log.error("<=== Item {} already lend or date is expire  ===>", orderDetailsRequest.getItemDetailsId());
+            throw new DuplicateDataException("Item already lend or lend date expire");
+        }
+
+        ItemDetailsProjection itemPriceDetailsObj=itemPriceDetailsRepository.findIdByItemDetailsIdAndUserId(orderDetailsRequest.getItemDetailsId(),2l);
+        if(itemPriceDetailsObj != null){
+            log.error("<=== Item {} already lend by the user {}  ===>", orderDetailsRequest.getItemDetailsId(),2l);
+            throw new DuplicateDataException("Item already requested for lend");
+        }
+
+        if(itemDetails.isBeedingType()){
+            if(orderDetailsRequest.getPrice() > itemDetails.getMaxPrice() || orderDetailsRequest.getPrice()<itemDetails.getMinPrice()){
+                log.error("<=== Invalid Price for the item {} ===>",orderDetailsRequest.getItemDetailsId());
+                throw new InvalidDetailsException("Please provide bid between min and max price");
+            }
+        }
+        else{
+            if(orderDetailsRequest.getPrice()>itemDetails.getFlatPrice() || orderDetailsRequest.getPrice()<itemDetails.getFlatPrice()){
+                log.error("<=== Invalid Price for the item {} ===>",orderDetailsRequest.getItemDetailsId());
+                throw new InvalidDetailsException("Please provide the actual price");
+            }
+        }
+        ItemPriceDetails itemPriceDetails=new ItemPriceDetails();
+        itemPriceDetails.setItemDetailsId(orderDetailsRequest.getItemDetailsId());
+        itemPriceDetails.setPrice(orderDetailsRequest.getPrice());
+        itemPriceDetails.setOwnerApproval(false);
+        itemPriceDetails.setUserId(1l);
+        itemPriceDetails.setViewedStatus(false);
+        itemPriceDetailsRepository.save(itemPriceDetails);
+        log.info("<=== Completed placing order for the item {} ===>",orderDetailsRequest.getItemDetailsId());
+        return ResponseJsonUtil.getSuccessResponseJson();
+    }
+
+    public Map approveRequest(ApproveOrderRequest approveOrderRequest){
+        log.info("<=== Started approving requested for the item_details {}===>",approveOrderRequest.getItemDetailsId());
+
+        log.info("<=== Completed approving requested for the item_details {}===>",approveOrderRequest.getItemDetailsId());
+        return ResponseJsonUtil.getSuccessResponseJson("Item approved successfully");
     }
 
     public HashMap findAllItems(ItemsFilterRequest itemsFilterRequest) {
