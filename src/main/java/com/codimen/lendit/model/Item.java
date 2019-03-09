@@ -21,7 +21,7 @@ private Long id;
 private String itemName;
 
 @Column(name = "item_category_id")
-private int itemCategoryId;
+private Integer itemCategoryId;
 
 @Column(name = "owner_id")
 private Long ownerId;

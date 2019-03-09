@@ -22,7 +22,7 @@ public class ItemPriceDetails extends Traceable {
     private Long userId;
 
     @Column(name = "price")
-    private int price;
+    private Integer price;
 
     @Column(name = "owner_approval")
     private boolean ownerApproval;

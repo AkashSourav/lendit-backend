@@ -1,6 +1,8 @@
 package com.codimen.lendit.controller;
 
 import com.codimen.lendit.dto.request.CreateItemRequest;
+import com.codimen.lendit.dto.request.ItemRelendDetailsRequest;
+import com.codimen.lendit.exception.DuplicateDataException;
 import com.codimen.lendit.service.ItemServices;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -23,6 +25,13 @@ public class ItemController {
     @PostMapping(value = "/new",produces = MediaType.APPLICATION_JSON_VALUE)
     private ResponseEntity createItem(@RequestBody CreateItemRequest createItemRequest){
         Map response=itemServices.createItem(createItemRequest);
+        return new ResponseEntity(response, HttpStatus.OK);
+    }
+
+
+    @PostMapping(value = "/relend",produces = MediaType.APPLICATION_JSON_VALUE)
+    private ResponseEntity createRelendItem(@RequestBody ItemRelendDetailsRequest itemRelendDetailsRequest) throws DuplicateDataException {
+        Map response=itemServices.createRelendItemDetails(itemRelendDetailsRequest);
         return new ResponseEntity(response, HttpStatus.OK);
     }
 

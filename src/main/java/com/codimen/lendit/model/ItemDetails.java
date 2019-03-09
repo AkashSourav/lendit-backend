@@ -24,7 +24,7 @@ public class ItemDetails extends Traceable {
     private boolean soldStatus=false;
 
     @Column(name = "sold_price")
-    private int soldPrice;
+    private Integer soldPrice;
 
     @Column(name = "address")
     private String address;
@@ -39,13 +39,13 @@ public class ItemDetails extends Traceable {
     private boolean beedingType;
 
     @Column(name = "min_price")
-    private int minPrice;
+    private Integer minPrice;
 
     @Column(name = "max_price")
-    private int maxPrice;
+    private Integer maxPrice;
 
     @Column(name = "flat_price")
-    private int flatPrice;
+    private Integer flatPrice;
 
     @OneToMany(cascade = CascadeType.ALL,fetch = FetchType.LAZY,orphanRemoval = true)
     @JoinColumn(name = "item_details_id")

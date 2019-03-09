@@ -2,6 +2,7 @@ package com.codimen.lendit.exception.handler;
 
 import com.codimen.lendit.exception.AuthorizationException;
 import com.codimen.lendit.exception.DataFoundNullException;
+import com.codimen.lendit.exception.DuplicateDataException;
 import com.codimen.lendit.exception.EntityNotFoundException;
 import com.codimen.lendit.utils.ResponseJsonUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -283,6 +284,13 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
         String error = "Access denied!";
         log.error(ex.getMessage(), ex);
         return buildResponseEntity(new ApiError(HttpStatus.UNAUTHORIZED, error, ex));
+    }
+
+    @ExceptionHandler(DuplicateDataException.class)
+    protected ResponseEntity<Object> handleDuplicateDataException(AuthenticationServiceException ex) {
+        String error = "Access denied!";
+        log.error(ex.getMessage(), ex);
+        return buildResponseEntity(new ApiError(BAD_REQUEST, error, ex));
     }
 
     /**
